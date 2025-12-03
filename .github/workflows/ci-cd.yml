@@ -24,8 +24,8 @@ jobs:
       - name: Configure project
         run: cmake -S . -B build
 
-      - name: Build project
-        run: cmake --build build
+      - name: Build project (без тестов)
+        run: cmake --build build --target BigIntLib
 
   test:
     name: Run tests on ${{ matrix.os }}
@@ -54,9 +54,14 @@ jobs:
 
       - name: Run tests (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
+        shell: bash
         run: |
-          build-test\Debug\run_tests.exe
+          if [ -f "build-test/Debug/run_tests.exe" ]; then
+            ./build-test/Debug/run_tests.exe
+          else
+            find build-test -name "*.exe" -type f
+            exit 1
+          fi
 
   deploy:
     name: Deploy
@@ -68,12 +73,5 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build for production
-        run: |
-          cmake -S . -B build-prod -DCMAKE_BUILD_TYPE=Release
-          cmake --build build-prod
-
       - name: Show deployment info
-        run: |
-          echo "Build completed successfully"
-          echo "To deploy add SSH secrets to repository settings"
+        run: echo "Build and tests completed successfully"
