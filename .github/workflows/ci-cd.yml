@@ -17,30 +17,30 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install dependencies (Linux)
+      - name: Install CMake (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget software-properties-common lsb-release
+          wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc | sudo apt-key add -
+          sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+          sudo apt-get update
+          sudo apt-get install -y cmake
 
-      - name: Install Ninja (Windows)
+      - name: Install CMake (Windows)
         if: runner.os == 'Windows'
-        uses: microsoft/setup-msbuild@v2
+        uses: Kitware/setup-cmake@v3
+        with:
+          cmake-version: 4.0.0
+
 
       - name: Configure CMake
-        run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
       - name: Build
-        run: |
-          cmake --build build --config Release
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ matrix.os }}
-          path: build/
-
+        run: cmake --build build --config Release
 
 
   test:
@@ -53,8 +53,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
@@ -71,7 +70,6 @@ jobs:
         if: runner.os == 'Windows'
 
 
-
   deploy:
     name: Deploy to remote server
     runs-on: ubuntu-latest
@@ -79,8 +77,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Copy files to server via SSH
         uses: appleboy/scp-action@v0.1.7
