@@ -1,4 +1,4 @@
-name: C++ BigInt CI/CD
+name: C++ BigInt CI/CD Pipeline
 
 on:
   push:
@@ -18,11 +18,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v1.14
+
       - name: Install Ninja (Windows only)
         if: runner.os == 'Windows'
         run: choco install ninja -y
 
-      - name: Configure
+      - name: Configure project
         shell: bash
         run: |
           if [[ "${{ runner.os }}" == "Windows" ]]; then
@@ -31,13 +34,13 @@ jobs:
             cmake -S . -B build
           fi
 
-      - name: Build
+      - name: Build project (без тестов)
         shell: bash
         run: |
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            ninja -C build
+            ninja -C build BigIntLib
           else
-            cmake --build build
+            cmake --build build --target BigIntLib
           fi
 
   test:
@@ -52,6 +55,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v1.14
+
       - name: Install Ninja (Windows only)
         if: runner.os == 'Windows'
         run: choco install ninja -y
@@ -62,7 +68,7 @@ jobs:
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             cmake -S . -B build-test -G "Ninja"
           else
-            cmake -S . -B build-test
+            cmake -S . -B build-test -DCMAKE_BUILD_TYPE=Debug
           fi
 
       - name: Build tests
@@ -74,14 +80,16 @@ jobs:
             cmake --build build-test --target run_tests
           fi
 
-      - name: Run tests
+      - name: Run tests (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          ./build-test/run_tests
+
+      - name: Run tests (Windows)
+        if: runner.os == 'Windows'
         shell: bash
         run: |
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            ./build-test/run_tests.exe
-          else
-            ./build-test/run_tests
-          fi
+          ./build-test/run_tests.exe
 
   deploy:
     name: Deploy
