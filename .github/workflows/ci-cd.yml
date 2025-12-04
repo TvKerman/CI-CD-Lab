@@ -91,29 +91,29 @@ jobs:
         run: |
           ./build-test/run_tests.exe
 
-deploy:
-  name: Deploy on self-hosted Windows runner
-  runs-on: [self-hosted, Windows]
-  needs: [build, test]
-  if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  deploy:
+    name: Deploy on self-hosted Windows runner
+    runs-on: [self-hosted, Windows]
+    needs: [build, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup CMake
-      uses: jwlawson/actions-setup-cmake@v1.14
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v1.14
 
-    - name: Configure and build main
-      shell: pwsh
-      run: |
-        Write-Host "Configuring project..."
-        cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
-        Write-Host "Building main.exe..."
-        cmake --build build-release --target main
+      - name: Configure and build main
+        shell: pwsh
+        run: |
+          Write-Host "Configuring project..."
+          cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+          Write-Host "Building main.exe..."
+          cmake --build build-release --target main
 
-    - name: Run main binary
-      shell: pwsh
-      run: |
-        Write-Host "=== Program output ==="
-        ./build-release/main.exe
+      - name: Run main binary
+        shell: pwsh
+        run: |
+          Write-Host "=== Program output ==="
+          ./build-release/main.exe
