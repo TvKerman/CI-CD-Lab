@@ -91,26 +91,29 @@ jobs:
         run: |
           ./build-test/run_tests.exe
 
-  deploy:
-    name: Deploy on self-hosted runner
-    runs-on: [self-hosted, linux]
-    needs: [build, test]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+deploy:
+  name: Deploy on self-hosted Windows runner
+  runs-on: [self-hosted, Windows]
+  needs: [build, test]
+  if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup CMake
-        uses: jwlawson/actions-setup-cmake@v1.14
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1.14
 
-      - name: Run main binary
-        shell: bash
-        run: |
-          echo "Running BigInt main program on self-hosted runner..."
+    - name: Configure and build main
+      shell: pwsh
+      run: |
+        Write-Host "Configuring project..."
+        cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+        Write-Host "Building main.exe..."
+        cmake --build build-release --target main
 
-          cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
-          cmake --build build-release --target main
-
-          echo "=== Program output ==="
-          ./build-release/main
+    - name: Run main binary
+      shell: pwsh
+      run: |
+        Write-Host "=== Program output ==="
+        ./build-release/main.exe
