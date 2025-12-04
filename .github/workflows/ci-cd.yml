@@ -92,8 +92,8 @@ jobs:
           ./build-test/run_tests.exe
 
   deploy:
-    name: Deploy on self-hosted Windows runner
-    runs-on: [self-hosted, Windows]
+    name: Deploy on self-hosted Windows runner (MinGW + Ninja)
+    runs-on: [self-hosted, windows]
     needs: [build, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -101,18 +101,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure and build main
+      - name: Check CMake
+        run: cmake --version
         shell: powershell
-        run: |
-          Write-Host "Configuring project..."
-          cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
-  
-          Write-Host "Building main.exe..."
-          cmake --build build-release --target main
-  
-      - name: Run main binary
-        shell: powershell
-        run: |
-          Write-Host "=== Program output ==="
-          .\build-release\main.exe
 
+      - name: Install MinGW
+        run: choco install mingw -y
+        shell: powershell
+
+      - name: Install Ninja
+        run: choco install ninja -y
+        shell: powershell
+
+      - name: Configure project with Ninja
+        shell: powershell
+        run: |
+          cmake -S . -B build-release -G "Ninja" -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build main.exe
+        shell: powershell
+        run: |
+          cmake --build build-release --target main
+
+      - name: Run main.exe
+        shell: powershell
+        run: |
+          .\build-release\main.exe
