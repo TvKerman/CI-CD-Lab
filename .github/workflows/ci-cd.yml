@@ -106,11 +106,15 @@ jobs:
         shell: powershell
 
       - name: Install MinGW
-        run: choco install mingw -y
+        run: |
+          choco install mingw -y
+          refreshenv
         shell: powershell
 
       - name: Install Ninja
-        run: choco install ninja -y
+        run: |
+          choco install ninja -y
+          refreshenv
         shell: powershell
 
       - name: Configure project with Ninja
