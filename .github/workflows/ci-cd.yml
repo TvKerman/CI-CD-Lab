@@ -102,17 +102,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure and build main
-        shell: pwsh
+        shell: powershell
         run: |
           Write-Host "Configuring project..."
           cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
   
           Write-Host "Building main.exe..."
           cmake --build build-release --target main
-
+  
       - name: Run main binary
-        shell: pwsh
+        shell: powershell
         run: |
           Write-Host "=== Program output ==="
-          ./build-release/main.exe
+          .\build-release\main.exe
 
