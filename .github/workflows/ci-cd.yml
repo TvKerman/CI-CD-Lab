@@ -101,14 +101,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup CMake
-        uses: jwlawson/actions-setup-cmake@v1.14
-
       - name: Configure and build main
         shell: pwsh
         run: |
           Write-Host "Configuring project..."
           cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+  
           Write-Host "Building main.exe..."
           cmake --build build-release --target main
 
@@ -117,3 +115,4 @@ jobs:
         run: |
           Write-Host "=== Program output ==="
           ./build-release/main.exe
+
