@@ -125,10 +125,10 @@ jobs:
           cmake --build build-release --target main
 
       - name: Show build folder
-        run: dir build-release
+        run: dir build-release\src
 
       - name: Run main.exe
         shell: powershell
         run: |
           Write-Host "=== Running main.exe ==="
-          & "${PWD}\build-release\main.exe"
+          & "${PWD}\build-release\src\main.exe"
