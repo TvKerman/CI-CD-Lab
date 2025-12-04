@@ -105,13 +105,11 @@ jobs:
         shell: powershell
         run: |
           choco install mingw -y --ignore-checksums
-          $env:Path = "C:\ProgramData\mingw64\mingw64\bin;" + $env:Path
 
       - name: Install Ninja
         shell: powershell
         run: |
           choco install ninja -y
-          $env:Path = "C:\ProgramData\chocolatey\bin;" + $env:Path
 
       - name: Verify tools
         shell: powershell
@@ -130,4 +128,4 @@ jobs:
         shell: powershell
         run: |
           Write-Host "=== Running main.exe ==="
-          ./build-release/main.exe
+          & "${PWD}\build-release\main.exe"
